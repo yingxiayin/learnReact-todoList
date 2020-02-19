@@ -1,71 +1,55 @@
-import React, { Component, Fragment } from 'react';
+import React from 'react';
+import { connect } from 'react-redux';
+import { getChangeInputValueAction, getDeleteItemAction, getAddItemAction } from './store/actionCreators';
 
-class TodoList extends Component {
 
-  constructor(props){
-    super(props);
-    this.state = {
-      inputValue: '',
-      list: []
+const TodoList = (props) => {
+  const { inputValue, list, changeInputValue, handleClick, handleDelete  } = props;
+
+  return (
+      <div>
+        <div>
+          <input
+              value={inputValue}
+              onChange={changeInputValue}
+          />
+          <button
+              onClick={handleClick}
+          >提交</button>
+        </div>
+        <ul>
+          {list.map((item, index) => {
+            return <li
+                onClick={() => handleDelete(index)}
+                key={index}
+            >{item}</li>
+          })}
+        </ul>
+      </div>
+  )
+
+};
+
+const mapStateToProps = (state) => {
+  return {
+    inputValue: state.inputValue,
+    list: state.list
+  }
+};
+const mapDispatchtoProps = (dispatch) => {
+  return {
+    changeInputValue(e) {
+      const action = getChangeInputValueAction(e.target.value);;
+      dispatch(action);
+    },
+    handleClick() {
+      const action = getAddItemAction();
+      dispatch(action);
+    },
+    handleDelete(index) {
+      const action = getDeleteItemAction(index);
+      dispatch(action);
     }
   }
-
-  render() {
-    return (
-        <Fragment>
-          <div>
-            <input
-                value={this.state.inputValue}
-                // 变更函数作用域
-                onChange={this.handleInputChange.bind(this)}
-            />
-            <button
-                onClick={this.handlebtnClick.bind(this)}
-            >
-              提交
-            </button>
-          </div>
-          <ul>
-            {
-              // 回调函数传参数
-              this.state.list.map((item, index) => {
-                return <li
-                    key={index}
-                    onClick={this.handleItemDelete.bind(this, index)}
-                >
-                  {item}
-                </li>
-              })
-            }
-          </ul>
-        </Fragment>
-    )
-  }
-
-  handleInputChange(e){
-    this.setState({
-      inputValue: e.target.value
-    })
-  }
-
-  handlebtnClick(){
-    this.setState({
-      // 展开运算符，来拼接数组
-      list: [...this.state.list, this.state.inputValue],
-      inputValue: ''
-    })
-  }
-
-  handleItemDelete(index){
-    // immutable 概念
-    // state 不允许我们做任何改变，考虑用副本修改
-    const list = [...this.state.list];
-    list.splice(index, 1);
-
-    this.setState({
-      list: list
-    })
-  }
-
-}
-export default TodoList;
+};
+export default connect(mapStateToProps, mapDispatchtoProps)(TodoList)
